@@ -10,8 +10,8 @@ export const register = async (req,res) => {
     const {email, password, username} = req.body
    
     try {
-        const userFound = await Paciente.findOne({email})
-        if (userFound) return res.status(400).json(['El usuario ya esta en uso'])
+        const pacienteFound = await Paciente.findOne({email})
+        if (pacienteFound) return res.status(400).json(['El usuario ya esta en uso'])
 
 
        const passwordHash = await bcrypt.hash(password, 10)
@@ -26,7 +26,7 @@ export const register = async (req,res) => {
 
        const pacienteSave = await newPaciente.save()
 
-       const token = await createAccesToken({id: userSave._id})
+       const token = await createAccesToken({id: pacienteSave._id})
 
         res.cookie('token', token)
 
@@ -50,26 +50,26 @@ export const login = async (req,res) => {
    
     try {
         // comparamos la contraseña con la del usuario de la bd
-      const userFound = await User.findOne({email})
+      const pacienteFound = await Paciente.findOne({email})
 
-      if(!userFound) return res.status(400).json({message: "User not found"})
+      if(!pacienteFound) return res.status(400).json({message: "Upps parece que tu correo no es el correcto o aún no estas registrado"})
 
 
-       const isMatch = await bcrypt.compare(password, userFound.password)
+       const isMatch = await bcrypt.compare(password, pacienteFound.password)
 
-       if(!isMatch) return res.status(400).json({message: "incorrect password"})
+       if(!isMatch) return res.status(400).json({message: "Contraseña incorrecta"})
 
-       const token = await createAccesToken({id: userFound._id})
+       const token = await createAccesToken({id: pacienteFound._id})
 
         res.cookie('token', token)
 
 
         res.json({
-            id: userFound._id,
-            username: userFound.username,
-            email: userFound.email,
-            createdAt: userFound.createdAt,
-            updatedAt: userFound.updatedAt
+            id: pacienteFound._id,
+            username: pacienteFound.username,
+            email: pacienteFound.email,
+            createdAt: pacienteFound.createdAt,
+            updatedAt: pacienteFound.updatedAt
         })
     } catch (error) {
        res.status(500).json({message: error.message})
@@ -85,15 +85,15 @@ export const logout = (req,res) => {
 }
 
 export const profile = async (req,res) => {
- const userFound = await User.findById(req.decoded.id)
- if(!userFound) return res.status(400).json({message: "User Not found"})
+ const pacienteFound = await Paciente.findById(req.decoded.id)
+ if(!pacienteFound) return res.status(400).json({message: "User Not found"})
 
  return res.json({
-    id: userFound._id,
-    username: userFound.username,
-    email: userFound.email,
-    createdAt: userFound.createdAt,
-    updatedAt: userFound.updatedAt
+    id: pacienteFound._id,
+    username: pacienteFound.username,
+    email: pacienteFound.email,
+    createdAt: pacienteFound.createdAt,
+    updatedAt: pacienteFound.updatedAt
  })
    res.send('profile')
 }
@@ -103,16 +103,16 @@ export const verifyToken = async (req, res) => {
 
     if(!token) return res.status(401).json({message: "No autorizado"})
 
-    jwt.verify(token, TOKEN_SECRET, async (err, user) => {
+    jwt.verify(token, TOKEN_SECRET, async (err, paciente) => {
         if(err) return res.status(401).json({message: "No autorizado"})
 
-      const userFound = await User.findById(user.id)
-      if (!userFound) return res.status(401).json({message: "No autorizado"})
+      const pacienteFound = await Paciente.findById(paciente.id)
+      if (!pacienteFound) return res.status(401).json({message: "No autorizado"})
 
       return res.json({
-        id: userFound.id,
-        username: userFound.username,
-        email: userFound.email
+        id: pacienteFound.id,
+        username: pacienteFound.username,
+        email: pacienteFound.email
       }
       )
     })
