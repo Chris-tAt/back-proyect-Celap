@@ -85,7 +85,7 @@ export const logout = (req,res) => {
 }
 
 export const profile = async (req,res) => {
- const pacienteFound = await Paciente.findById(req.decoded.id)
+ const pacienteFound = await Paciente.findById(req.user.id)
  if(!pacienteFound) return res.status(400).json({message: "User Not found"})
 
  return res.json({

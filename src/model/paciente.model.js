@@ -15,7 +15,56 @@ const pacienteSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-    }
+    },
+    identidad: {
+        type: String,
+        required: false,
+        unique: true,
+        sparse: true  // Esto permite varios documentos con 'identidad' nula
+    },
+    direccion: {
+        type: String,
+        required: false
+    },
+    date: {
+        type: Date,
+        default: Date.now,
+        required: false
+    },
+    nacimiento: {
+        type: String,
+        required: false
+    },
+    imagen: {
+        type: String,
+        required: false
+    },
+    area: {
+        type: String,
+        required: false
+    },
+    padre: {
+        type: String,
+        required: false
+    },
+    madre: {
+        type: String,
+        required: false
+    },
+    informe: {
+        type: String,
+        required: false
+    },
+    telefono: {
+        type: String,
+        required: false
+    },
+    compromiso: {
+        type: String,
+        required: false
+    },
+
+
 }, {timestamps:true})
 
 export default mongoose.model('Paciente', pacienteSchema)
