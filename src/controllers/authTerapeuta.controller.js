@@ -1,4 +1,5 @@
 import Terapeuta from '../model/terapeuta.model.js'
+import Area from '../model/area.model.js'
 import bcrypt from "bcryptjs"
 import { createAccesToken } from "../libs/jwt.js";
 import jwt from "jsonwebtoken";
@@ -7,7 +8,7 @@ import { TOKEN_SECRET } from "../config.js";
 // con esta funcion estamos creando un usuario, estamos hasheando el password y estamos colocando un jwt
 
 export const register = async (req,res) => {
-    const {email, password, username} = req.body
+    const {email, password, username, area_asignada} = req.body
    
     try {
         const terapeutaFound = await Terapeuta.findOne({email})
@@ -20,7 +21,8 @@ export const register = async (req,res) => {
         const newTerapeuta = new Terapeuta ({
             email, 
             username,
-            password: passwordHash 
+            password: passwordHash,
+            area_asignada 
         })
         const terapeutaSave = await newTerapeuta.save();
         
@@ -33,6 +35,7 @@ export const register = async (req,res) => {
             id: terapeutaSave._id,
             username: terapeutaSave.username,
             email: terapeutaSave.email,
+            area_asignada: terapeutaSave.area_asignada,
             createdAt: terapeutaSave.createdAt,
             updatedAt: terapeutaSave.updatedAt
         })
@@ -57,6 +60,8 @@ export const login = async (req,res) => {
 
        if(!isMatch) return res.status(400).json({message: "Contraseña incorrecta"})
 
+       const area = await Area.findOne({ _id: pacienteFound.area_asignada})
+
        const token = await createAccesToken({id: terapeutaFound._id})
 
         res.cookie('token', token)
@@ -66,6 +71,7 @@ export const login = async (req,res) => {
             id: terapeutaFound._id,
             username: terapeutaFound.username,
             email: terapeutaFound.email,
+            area_asignada: area ? area.nombre : null,
             createdAt: terapeutaFound.createdAt,
             updatedAt: terapeutaFound.updatedAt
         })

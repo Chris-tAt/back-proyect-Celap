@@ -1,4 +1,5 @@
 import Paciente from '../model/paciente.model.js'
+import Area from '../model/area.model.js'
 import bcrypt from "bcryptjs"
 import { createAccesToken } from "../libs/jwt.js";
 import jwt from "jsonwebtoken";
@@ -7,7 +8,7 @@ import { TOKEN_SECRET } from "../config.js";
 // con esta funcion estamos creando un usuario, estamos hasheando el password y estamos colocando un jwt
 
 export const register = async (req,res) => {
-    const {email, password, username} = req.body
+    const {email, password, username, area_asignada} = req.body
    
     try {
         const pacienteFound = await Paciente.findOne({email})
@@ -20,13 +21,15 @@ export const register = async (req,res) => {
         const newPaciente = new Paciente ({
             email, 
             username,
-            password: passwordHash 
+            password: passwordHash,
+            area_asignada,
+
         })
 
 
        const pacienteSave = await newPaciente.save()
 
-       const token = await createAccesToken({id: pacienteSave._id})
+       const token = await createAccesToken({id: pacienteSave._id, area_asignada: pacienteSave.area_asignada})
 
         res.cookie('token', token)
 
@@ -35,6 +38,7 @@ export const register = async (req,res) => {
             id: pacienteSave._id,
             username: pacienteSave.username,
             email: pacienteSave.email,
+            area_asignada: pacienteSave.area_asignada,
             createdAt: pacienteSave.createdAt,
             updatedAt: pacienteSave.updatedAt
         })
@@ -59,8 +63,12 @@ export const login = async (req,res) => {
 
        if(!isMatch) return res.status(400).json({message: "Contraseña incorrecta"})
 
-       const token = await createAccesToken({id: pacienteFound._id})
+       const area = await Area.findOne({ _id: pacienteFound.area_asignada });
 
+       const token = await createAccesToken({
+        id: pacienteFound._id,
+        area_asignada: area ? area.nombre : null
+    });
         res.cookie('token', token)
 
 
@@ -68,6 +76,7 @@ export const login = async (req,res) => {
             id: pacienteFound._id,
             username: pacienteFound.username,
             email: pacienteFound.email,
+            area_asignada: area ? area.nombre : null,
             createdAt: pacienteFound.createdAt,
             updatedAt: pacienteFound.updatedAt
         })
@@ -112,7 +121,8 @@ export const verifyToken = async (req, res) => {
       return res.json({
         id: pacienteFound.id,
         username: pacienteFound.username,
-        email: pacienteFound.email
+        email: pacienteFound.email,
+
       }
       )
     })

@@ -12,7 +12,19 @@ export const authRequire = (req, res, next) => {
 
 
     next()
-   })
-    
+   })  
+};
 
-} 
+export const areaMiddleware = async (req, res, next) => {
+    const nombreArea = req.params.asignada; // Extraer el nombre del área de la ruta
+    const usuario = req.user; // Obtener información del usuario autenticado
+    // Verificar si el usuario (paciente) tiene acceso al área específica
+
+    console.log('Nombre del área desde la ruta:', nombreArea);
+    console.log('Área asignada al usuario:', usuario.area_asignada);
+    if (usuario.area_asignada !== nombreArea) {
+        res.status(403).json({ message: 'Acceso no autorizado' });
+    } else {
+        next(); // Usuario autorizado
+    }
+};

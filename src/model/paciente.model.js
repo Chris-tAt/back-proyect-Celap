@@ -39,10 +39,10 @@ const pacienteSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    area: {
-        type: String,
-        required: false
-    },
+    area_asignada: { type: mongoose.Schema.Types.ObjectId,
+         ref: 'Area',
+         required: true },
+    
     padre: {
         type: String,
         required: false
